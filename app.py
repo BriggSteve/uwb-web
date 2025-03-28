@@ -17,11 +17,12 @@ conn = psycopg2.connect(
 def index():
     cur = conn.cursor()
     cur.execute("""
-        SELECT device_id, timestamp, x, y, z
+        SELECT device_id, timestamp, x, y, z, command
         FROM packets
         ORDER BY timestamp DESC
         LIMIT 20
     """)
+
     rows = cur.fetchall()
     cur.close()
     return render_template("index.html", packets=rows)
