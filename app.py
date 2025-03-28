@@ -1,6 +1,18 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, app
 import psycopg2
 import os
+
+
+COMMAND_NAMES = {
+    0: "POS_UPDATE",
+    1: "HELLO_WORLD",
+    2: "ALERT",
+    3: "PING_REQUEST",
+    4: "PING_RESPONSE",
+    5: "SHUTDOWN",
+    6: "CONFIG_UPDATE"
+}
+
 
 app = Flask(__name__)
 
@@ -22,10 +34,15 @@ def index():
         ORDER BY timestamp DESC
         LIMIT 20
     """)
-
     rows = cur.fetchall()
     cur.close()
-    return render_template("index.html", packets=rows)
+
+    # Convert command int to name
+    packets = [
+        (device_id, timestamp, x, y, z, COMMAND_NAMES.get(command, f"UNKNOWN ({command})"))
+        for device_id, timestamp, x, y, z, command in rows
+    ]
+    return render_template("index.html", packets=packets)
 
 if __name__ == "__main__":
     app.run(debug=True)
